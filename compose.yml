@@ -1,19 +1,6 @@
 version: '3.1'
 
 services:
-  mongodb:
-    image: mongo
-    container_name: mongodb
-    hostname: host-mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: mision31
-    volumes:
-      - default-volume-mongo:/data/db
-      - default-volume-mongo:/var/mongodb
-    ports:
-      - "27017:27017"
-
   mysqldb:
     container_name: mysql
     image: mysql
