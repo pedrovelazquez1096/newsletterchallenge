@@ -1,0 +1,70 @@
+version: '3.1'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    hostname: host-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mision31
+    volumes:
+      - default-volume-mongo:/data/db
+      - default-volume-mongo:/var/mongodb
+    ports:
+      - "27017:27017"
+
+  mysqldb:
+    container_name: mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: "mision31"
+      MYSQL_DATABASE: "PVelazquezDB"
+      MYSQL_USER: "pvelazquez$%#543"
+      MYSQL_PASSWORD: "EstaEsLaContraseniaNumero1234ParaDB"
+    ports:
+      - "3306:3306"
+    volumes:
+      - default-volume-mysql:/var/lib/mysql:rw
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: "mailhog"
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  default-azurite:
+    container_name: default-azurite
+    image: mcr.microsoft.com/azure-storage/azurite:3.27.0
+    expose:
+      - 10000
+      - 10001
+      - 10002
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - default-volume-azurite:/data mcr.microsoft.com/azure-storage/azurite
+
+volumes:
+  default-volume-azurite:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./project-data/azurite
+  default-volume-mongo:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./project-data/mongo
+  default-volume-mysql:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./project-data/mysql
