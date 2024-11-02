@@ -1,15 +1,11 @@
 package com.pvelazquez.newslettlerchallenge.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import com.pvelazquez.newslettlerchallenge.exceptions.NotFoundException;
 import com.pvelazquez.newslettlerchallenge.models.Recipient;
 import com.pvelazquez.newslettlerchallenge.repositories.RecipientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,33 +20,17 @@ public class RecipientService {
         this.patcherUtil = patcherUtil;
     }
 
-    public Recipient saveRecipient(Recipient recipient){
-        return recipientRepo.save(recipient);
-    }
-
     public void saveRecipients(List<String> emailList){
-        try {
-            for(String email : emailList) {
+        for(String email : emailList) {
+            try {
                 recipientRepo.save(Recipient.builder()
                                 .email(email)
                                 .subscribed(true)
                                 .build());
+            }catch (Exception ignored){
+
             }
-        }catch (Exception ignored){
-
         }
-    }
-
-    public Recipient patchRecipient(UUID id, JsonPatch patch) throws JsonPatchException, JsonProcessingException, NotFoundException {
-        Optional<Recipient> recipientOptional = recipientRepo.findById(id);
-
-        if(recipientOptional.isEmpty())
-            throw new NotFoundException("Recipient not found");
-
-        Recipient recipient = recipientOptional.get();
-
-        recipient = patcherUtil.applyPatchRecipient(patch, recipient);
-        return recipientRepo.save(recipient);
     }
 
     public Recipient getRecipientById(UUID id) throws NotFoundException {
@@ -66,12 +46,12 @@ public class RecipientService {
         return recipientRepo.findAllByEmailIn(keyword);
     }
 
-    public Recipient unsubscribeRecipient(UUID uuid) throws NotFoundException {
+    public void unsubscribeRecipient(UUID uuid) throws NotFoundException {
         Recipient recipient = getRecipientById(uuid);
 
         recipient.setSubscribed(false);
 
-        return recipientRepo.save(recipient);
+        recipientRepo.save(recipient);
     }
 
     public List<Recipient> getAllRecipients() {

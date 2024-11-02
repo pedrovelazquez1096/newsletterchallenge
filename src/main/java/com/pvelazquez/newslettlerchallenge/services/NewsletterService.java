@@ -15,7 +15,6 @@ public class NewsletterService {
     private final RecipientService recipientService;
     private final EmailSenderService emailSenderService;
     private final DocumentService documentService;
-    private final EmailBodyService emailBodyService;
 
     public void sendNewsletter(NewsletterDTO newsletterDTO) throws MessagingException {
         recipientService.saveRecipients(newsletterDTO.getEmails());
@@ -28,6 +27,6 @@ public class NewsletterService {
         List<Document> documents = documentService.getAllDocuments(newsletterDTO.getDocuments());
 
 
-        emailSenderService.sendEmail("test", emailBodyService.getEmailBody(), recipients, true, documents);
+        emailSenderService.prepareEmail("test", recipients, documents);
     }
 }
