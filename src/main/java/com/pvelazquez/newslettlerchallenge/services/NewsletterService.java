@@ -25,7 +25,7 @@ public class NewsletterService {
         List<Document> documents = documentService.getAllDocuments(newsletterDTO.getDocuments());
 
 
-        emailSenderService.prepareEmail("test", recipients, documents);
+        emailSenderService.prepareEmail(newsletterDTO.getSubject(), recipients, documents);
     }
 
     public Metric getMetrics(){
