@@ -13,4 +13,6 @@ import java.util.UUID;
 public interface RecipientRepo extends JpaRepository<Recipient, UUID> {
     @Query("SELECT u FROM Recipient u WHERE u.email IN :emails")
     List<Recipient> findAllByEmailIn(@Param("emails") List<String> emails);
+
+    List<Recipient> findAllBySubscribed(boolean subscribed);
 }

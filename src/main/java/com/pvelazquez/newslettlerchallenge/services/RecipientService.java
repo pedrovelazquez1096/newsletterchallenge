@@ -1,27 +1,32 @@
 package com.pvelazquez.newslettlerchallenge.services;
 
 import com.pvelazquez.newslettlerchallenge.exceptions.NotFoundException;
-import com.pvelazquez.newslettlerchallenge.models.Newsletter;
+import com.pvelazquez.newslettlerchallenge.models.Metric;
 import com.pvelazquez.newslettlerchallenge.models.Recipient;
 import com.pvelazquez.newslettlerchallenge.models.dto.NewsletterDTO;
 import com.pvelazquez.newslettlerchallenge.repositories.RecipientRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@AllArgsConstructor
 @Service
 public class RecipientService {
     private final RecipientRepo recipientRepo;
-    private final PatcherUtil patcherUtil;
 
-    public RecipientService(@Autowired RecipientRepo recipientRepo, @Autowired PatcherUtil patcherUtil){
-        this.recipientRepo = recipientRepo;
-        this.patcherUtil = patcherUtil;
+    public Metric getMetrics(){
+        long subscribed = recipientRepo.findAllBySubscribed(true).size();
+        long unSubscribed = recipientRepo.findAllBySubscribed(false).size();
+
+        return Metric.builder()
+                .recipientsUnsubscribed(unSubscribed)
+                .recipientsSubscribed(subscribed)
+                .totalRecipients(unSubscribed + subscribed)
+                .build();
     }
-
     public void saveRecipients(List<String> emailList){
         for(String email : emailList) {
             try {

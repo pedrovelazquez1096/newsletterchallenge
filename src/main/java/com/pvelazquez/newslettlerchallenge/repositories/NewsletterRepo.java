@@ -11,5 +11,6 @@ import java.util.UUID;
 @Repository
 public interface NewsletterRepo extends JpaRepository<Newsletter, UUID> {
     List<Newsletter> findByScheduledTimeBeforeAndStatus(Date date, Newsletter.Status status);
+    List<Newsletter> findAllByStatus(Newsletter.Status status);
 
 }

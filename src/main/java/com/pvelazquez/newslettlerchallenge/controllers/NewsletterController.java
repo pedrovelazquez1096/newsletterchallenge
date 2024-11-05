@@ -41,7 +41,7 @@ public class NewsletterController {
     }
 
     @PostMapping("/schedule/cancel")
-    public boolean cancelScheduleEmail(@RequestParam UUID uuid){
-        return scheduledEmailService.cancelScheduledEmail(uuid);
+    public boolean cancelScheduleEmail(@RequestParam UUID id){
+        return scheduledEmailService.cancelScheduledEmail(id);
     }
 }
