@@ -26,23 +26,7 @@ public class EmailSenderService {
     @Value("${notification.host_port}")
     String hostPort;
 
-    public void prepareEmail(String subject, List<Recipient> recipientList, List<Document> documents) throws MessagingException {
-        HashMap<String, ByteArrayResource> documentsBytes = new HashMap<>();
-
-        for(Document document : documents){
-            String base64 = client.downloadFile(document.getUrl());
-
-            ByteArrayResource byteArrayResource = new ByteArrayResource(Base64.getDecoder().decode(base64));
-
-            documentsBytes.put(document.getFileName(), byteArrayResource);
-        }
-
-        for(Recipient recipient : recipientList)
-            sendEmail(subject, recipient, documentsBytes);
-
-    }
-
-    private void sendEmail(String subject, Recipient recipient, HashMap<String, ByteArrayResource> documentsBytes) throws MessagingException {
+    private JavaMailSenderImpl createJavaMailSenderImpl() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
         mailSender.setHost(hostName);
@@ -52,6 +36,11 @@ public class EmailSenderService {
 
         Properties properties = mailSender.getJavaMailProperties();
         properties.put("mail.transport.protocol", "smtp");
+
+        return  mailSender;
+    }
+
+    private MimeMessage createMimeMessage(JavaMailSenderImpl mailSender, String subject, Recipient recipient, HashMap<String, ByteArrayResource> documentsBytes) throws MessagingException {
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
 
@@ -67,7 +56,32 @@ public class EmailSenderService {
         for(Map.Entry<String, ByteArrayResource> entry : documentsBytes.entrySet())
             mimeMessageHelper.addAttachment(entry.getKey(), entry.getValue());
 
+        return mimeMessage;
+    }
 
+    public void prepareEmail(String subject, List<Recipient> recipientList, List<Document> documents) throws MessagingException {
+        HashMap<String, ByteArrayResource> documentsBytes = createDocumentsBytes(documents);
+
+        for(Recipient recipient : recipientList)
+            sendEmail(subject, recipient, documentsBytes);
+
+    }
+    public HashMap<String, ByteArrayResource> createDocumentsBytes(List<Document> documents){
+        HashMap<String, ByteArrayResource> documentsBytes = new HashMap<>();
+
+        for(Document document : documents){
+            String base64 = client.downloadFile(document.getUrl());
+
+            ByteArrayResource byteArrayResource = new ByteArrayResource(Base64.getDecoder().decode(base64));
+
+            documentsBytes.put(document.getFileName(), byteArrayResource);
+        }
+        return documentsBytes;
+    }
+    public void sendEmail(String subject, Recipient recipient, HashMap<String, ByteArrayResource> documentsBytes) throws MessagingException {
+        JavaMailSenderImpl mailSender = createJavaMailSenderImpl();
+        MimeMessage mimeMessage = createMimeMessage(mailSender, subject, recipient, documentsBytes);
         mailSender.send(mimeMessage);
     }
+
 }

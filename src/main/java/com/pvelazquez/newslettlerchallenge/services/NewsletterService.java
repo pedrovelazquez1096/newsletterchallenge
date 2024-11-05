@@ -17,13 +17,7 @@ public class NewsletterService {
     private final DocumentService documentService;
 
     public void sendNewsletter(NewsletterDTO newsletterDTO) throws MessagingException {
-        recipientService.saveRecipients(newsletterDTO.getEmails());
-        List<Recipient> recipients = recipientService.findRecipients(newsletterDTO.getEmails());
-
-        recipients = recipients.stream()
-                .filter(Recipient::isSubscribed)
-                .toList();
-
+        List<Recipient> recipients = recipientService.saveNewRecipientsAndGetSubcribedRecipients(newsletterDTO);
         List<Document> documents = documentService.getAllDocuments(newsletterDTO.getDocuments());
 
 

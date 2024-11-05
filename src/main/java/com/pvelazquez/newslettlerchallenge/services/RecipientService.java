@@ -1,7 +1,9 @@
 package com.pvelazquez.newslettlerchallenge.services;
 
 import com.pvelazquez.newslettlerchallenge.exceptions.NotFoundException;
+import com.pvelazquez.newslettlerchallenge.models.Newsletter;
 import com.pvelazquez.newslettlerchallenge.models.Recipient;
+import com.pvelazquez.newslettlerchallenge.models.dto.NewsletterDTO;
 import com.pvelazquez.newslettlerchallenge.repositories.RecipientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +34,16 @@ public class RecipientService {
             }
         }
     }
+    public List<Recipient> saveNewRecipientsAndGetSubcribedRecipients(NewsletterDTO newsletterDTO){
+        saveRecipients(newsletterDTO.getEmails());
+        List<Recipient> recipients = findRecipients(newsletterDTO.getEmails());
 
+        recipients = recipients.stream()
+                .filter(Recipient::isSubscribed)
+                .toList();
+
+        return recipients;
+    }
     public Recipient getRecipientById(UUID id) throws NotFoundException {
         Optional<Recipient> recipientOptional = recipientRepo.findById(id);
 

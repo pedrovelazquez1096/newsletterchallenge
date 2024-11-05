@@ -1,47 +1,85 @@
 package com.pvelazquez.newslettlerchallenge.schedulers;
 
+import com.pvelazquez.newslettlerchallenge.models.Document;
+import com.pvelazquez.newslettlerchallenge.models.Newsletter;
+import com.pvelazquez.newslettlerchallenge.models.Recipient;
+import com.pvelazquez.newslettlerchallenge.models.dto.NewsletterDTO;
+import com.pvelazquez.newslettlerchallenge.repositories.NewsletterRepo;
+import com.pvelazquez.newslettlerchallenge.services.EmailSenderService;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.concurrent.ScheduledFuture;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
 public class ScheduledEmailService {
-
-    private final JavaMailSender mailSender;
+    private final NewsletterRepo newsletterRepo;
     private final ThreadPoolTaskScheduler taskScheduler;
+    private final EmailSenderService emailSenderService;
 
-    public ScheduledEmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    @Autowired
+    public ScheduledEmailService(NewsletterRepo newsletterRepo, EmailSenderService emailSenderService) {
+        this.newsletterRepo = newsletterRepo;
         this.taskScheduler = new ThreadPoolTaskScheduler();
         this.taskScheduler.initialize();
+        this.emailSenderService = emailSenderService;
     }
 
-    public void scheduleEmail(String to, String subject, String text, Date scheduledTime) {
-        ScheduledFuture<?> scheduledTask = taskScheduler.schedule(() -> sendEmail(to, subject, text), scheduledTime);
-        // You can store scheduledTask if you need to manage or cancel it later
-    }
-
-    private void sendEmail(String to, String subject, String text) {
+    public UUID scheduleEmail(List<Recipient> recipients, List<Document> documents, Date scheduledTime, String subject) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            Newsletter scheduledEmail = new Newsletter();
+            scheduledEmail.setRecipients(recipients);
+            scheduledEmail.setDocuments(documents);
+            scheduledEmail.setScheduledTime(scheduledTime);
+            scheduledEmail.setSubject(subject);
+            scheduledEmail.setStatus(Newsletter.Status.SCHEDULED);
 
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(text, true);
+            scheduledEmail = newsletterRepo.save(scheduledEmail);
 
-            mailSender.send(message);
-            System.out.println("Email sent to " + to);
-        } catch (MessagingException e) {
-            log.error(e.getMessage());
+            Newsletter finalScheduledEmail = scheduledEmail;
+            taskScheduler.schedule(() -> sendScheduledEmail(finalScheduledEmail.getId()), scheduledTime);
+
+            return scheduledEmail.getId();
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public boolean cancelScheduledEmail(UUID emailId) {
+        Newsletter scheduledEmail = newsletterRepo.findById(emailId).orElse(null);
+
+        if (scheduledEmail != null && scheduledEmail.getStatus() == Newsletter.Status.SCHEDULED) {
+            scheduledEmail.setStatus(Newsletter.Status.CANCELLED);
+            newsletterRepo.save(scheduledEmail);
+            log.info("Emails cancelled {}", scheduledEmail.getSubject());
+            return true;
+        }
+        return false;
+    }
+
+    private void sendScheduledEmail(UUID emailId) {
+        Newsletter scheduledEmail = newsletterRepo.findById(emailId).orElse(null);
+
+        if (scheduledEmail != null && scheduledEmail.getStatus() == Newsletter.Status.SCHEDULED) {
+            try {
+
+                emailSenderService.prepareEmail(scheduledEmail.getSubject(), scheduledEmail.getRecipients(), scheduledEmail.getDocuments());
+
+                scheduledEmail.setStatus(Newsletter.Status.SENT);
+
+                newsletterRepo.save(scheduledEmail);
+                log.info("Emails send to {}", scheduledEmail.getSubject());
+            } catch (MessagingException e) {
+                log.error(e.getMessage());
+            }
         }
     }
 }
