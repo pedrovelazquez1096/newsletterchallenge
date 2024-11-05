@@ -3,15 +3,12 @@ package com.pvelazquez.newslettlerchallenge.controllers;
 import com.pvelazquez.newslettlerchallenge.exceptions.FileNotSaved;
 import com.pvelazquez.newslettlerchallenge.exceptions.NotASupportedFile;
 import com.pvelazquez.newslettlerchallenge.exceptions.NotFoundException;
-import com.pvelazquez.newslettlerchallenge.models.Document;
 import com.pvelazquez.newslettlerchallenge.services.DocumentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,13 +20,8 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping
-    public List<UUID> saveDocument(@RequestParam("document") List<MultipartFile> files) throws NotASupportedFile, FileNotSaved {
-        List<UUID> documents = new ArrayList<>();
-
-        for(MultipartFile file : files){
-            documents.add(documentService.saveDocument(file).getId());
-        }
-        return documents;
+    public UUID saveDocument(@RequestParam("document") MultipartFile file) throws NotASupportedFile, FileNotSaved {
+        return documentService.saveDocument(file).getId();
     }
 
     @DeleteMapping

@@ -39,4 +39,8 @@ public class NewsletterService {
                 .mailsCancelled(mailsCancelled)
                 .build();
     }
+
+    public List<Newsletter> readScheduleNewsletter() {
+        return newsletterRepo.findAllByStatus(Newsletter.Status.SCHEDULED);
+    }
 }

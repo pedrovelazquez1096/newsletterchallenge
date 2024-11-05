@@ -21,7 +21,6 @@ function MetricsDashboard() {
         setMetrics(response.data);
       } catch (error) {
         console.error('Error fetching metrics:', error);
-        // Handle errors, e.g., display an error message to the user
       }
     };
   

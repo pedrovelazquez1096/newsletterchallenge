@@ -1,6 +1,5 @@
 package com.pvelazquez.newslettlerchallenge.models.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +16,7 @@ import java.util.UUID;
 public class NewsletterDTO {
     private List<UUID> documents;
     private List<String> emails;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SS")
+    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SS")
     private LocalDateTime scheduleTime;
     private String subject;
 }

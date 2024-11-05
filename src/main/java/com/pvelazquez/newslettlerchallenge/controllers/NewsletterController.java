@@ -1,6 +1,7 @@
 package com.pvelazquez.newslettlerchallenge.controllers;
 
 import com.pvelazquez.newslettlerchallenge.models.Document;
+import com.pvelazquez.newslettlerchallenge.models.Newsletter;
 import com.pvelazquez.newslettlerchallenge.models.Recipient;
 import com.pvelazquez.newslettlerchallenge.models.dto.NewsletterDTO;
 import com.pvelazquez.newslettlerchallenge.schedulers.ScheduledEmailService;
@@ -37,12 +38,17 @@ public class NewsletterController {
         List<Document> documents = documentService.getAllDocuments(newsletterDTO.getDocuments());
 
 
-        Date date = Date.from(newsletterDTO.getScheduleTime().atZone(ZoneId.systemDefault()).toInstant());
+        Date date = Date.from( newsletterDTO.getScheduleTime().minusHours(6).atZone(ZoneId.systemDefault()).toInstant());
         return scheduledEmailService.scheduleEmail(recipients, documents, date, newsletterDTO.getSubject());
     }
 
     @PostMapping("/schedule/cancel")
     public boolean cancelScheduleEmail(@RequestParam UUID id){
         return scheduledEmailService.cancelScheduledEmail(id);
+    }
+
+    @GetMapping("/scheduled")
+    public List<Newsletter> readScheduleNewsletter(){
+        return newsletterService.readScheduleNewsletter();
     }
 }

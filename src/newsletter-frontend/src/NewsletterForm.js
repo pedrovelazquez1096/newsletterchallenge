@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Container, Form, Button, Row, Col, Modal } from 'react-bootstrap';
 import { useDropzone } from 'react-dropzone';
 import 'react-datepicker/dist/react-datepicker.css';
+import axios from 'axios';
 
 function NewsletterForm() {
-  // State management
   const [emails, setEmails] = useState([]);
   const [newEmail, setNewEmail] = useState('');
   const [subject, setSubject] = useState('');
@@ -12,13 +12,12 @@ function NewsletterForm() {
   const [showModal, setShowModal] = useState(false);
   const [removedFileName, setRemovedFileName] = useState('');
 
-  // Handle file drop
   const onDrop = (acceptedFiles) => {
     setFiles([...files, ...acceptedFiles]);
   };
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
-  // Handle adding a new email
+
   const addEmail = () => {
     if (newEmail && !emails.includes(newEmail)) {
       setEmails([...emails, newEmail]);
@@ -26,26 +25,74 @@ function NewsletterForm() {
     }
   };
 
-  // Handle removing an email
   const removeEmail = (emailToRemove) => {
     setEmails(emails.filter((email) => email !== emailToRemove));
   };
 
-  // Handle file removal
   const removeFile = (fileName) => {
     setFiles(files.filter((file) => file.name !== fileName));
     setRemovedFileName(fileName);
     setShowModal(true);
   };
 
-  // Close modal
+  const sendNewsletter = async () => {
+    if (!emails.length || !subject) {
+        alert('Please enter recipient emails and a subject!');
+        return;
+    }
+
+    const uploadPromises = files.map(async (file) => {
+        console.log("uploading file");
+        console.log(file);
+        const formData = new FormData();
+        
+        formData.append('document', file);
+
+        try {
+            const response = await axios.post('http://127.0.0.1:8080/api/v1/documents', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            });
+            console.log("ID: ");
+            console.log(response.data);
+            return response.data; 
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            return null;
+        }
+        });
+        
+    const uploadedIds = await Promise.all(uploadPromises);
+
+    try {
+        const response = await axios.post('http://127.0.0.1:8080/api/v1/newsletter', {
+            emails,
+            subject,
+            documents: uploadedIds, 
+        });
+    
+        console.log('Email sent successfully:', response.data);
+        resetForm(); 
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+  }
+
+  const resetForm = () => {
+    setEmails([]);
+    setNewEmail('');
+    setSubject('');
+    setFiles([]);
+  };
+
+
   const closeModal = () => setShowModal(false);
 
   return (
     <Container className="mt-4">
       <h2>Send a Newsletter Right Now</h2>
 
-      {/* Drag-and-Drop File Input */}
       <Form.Group className="mb-3">
         <Form.Label>Attach Files</Form.Label>
         <div {...getRootProps({ className: 'dropzone' })} style={dropzoneStyle}>
@@ -66,7 +113,6 @@ function NewsletterForm() {
         )}
       </Form.Group>
 
-      {/* Email Input */}
       <Form.Group className="mb-3">
         <Form.Label>Recipient Emails</Form.Label>
         <Row>
@@ -96,7 +142,6 @@ function NewsletterForm() {
         </ul>
       </Form.Group>
 
-      {/* Subject Input */}
       <Form.Group className="mb-3">
         <Form.Label>Subject</Form.Label>
         <Form.Control
@@ -107,12 +152,10 @@ function NewsletterForm() {
         />
       </Form.Group>
 
-      {/* Submit Button */}
-      <Button variant="primary" type="submit">
+      <Button variant="primary" type="submit" onClick={sendNewsletter}>
         Send Email
       </Button>
 
-      {/* Modal Notification */}
       <Modal show={showModal} onHide={closeModal}>
         <Modal.Header closeButton>
           <Modal.Title>File Removed</Modal.Title>
@@ -130,7 +173,6 @@ function NewsletterForm() {
 
 export default NewsletterForm;
 
-// Custom styles
 const dropzoneStyle = {
   border: '2px dashed #cccccc',
   borderRadius: '5px',
