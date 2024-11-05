@@ -19,6 +19,7 @@ import java.util.UUID;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/newsletter")
+@CrossOrigin(origins = "*")
 public class NewsletterController {
     private final NewsletterService newsletterService;
     private final ScheduledEmailService scheduledEmailService;

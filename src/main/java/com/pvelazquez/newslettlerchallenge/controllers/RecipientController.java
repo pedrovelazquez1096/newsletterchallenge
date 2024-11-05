@@ -12,6 +12,7 @@ import java.util.UUID;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/recipient")
+@CrossOrigin(origins = "*")
 public class RecipientController {
     private final RecipientService recipientService;
 
