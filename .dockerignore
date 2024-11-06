@@ -1,0 +1,10 @@
+Dockerfile
+.mvn
+.idea
+.gitignore
+HELP.md
+README.md
+mvnw
+mvnw.cmd
+project-data
+src/newsletter-frontend/node_modules
