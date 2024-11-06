@@ -36,6 +36,15 @@ services:
     volumes:
       - default-volume-azurite:/data mcr.microsoft.com/azure-storage/azurite
 
+  full-stack-app:
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+
 volumes:
   default-volume-azurite:
     driver: local
