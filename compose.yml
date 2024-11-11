@@ -1,8 +1,8 @@
-version: '3.1'
+version: "3.8"
 
 services:
-  mysqldb:
-    container_name: mysql
+  backend_database:
+    container_name: "mysql"
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
     environment:
@@ -10,40 +10,40 @@ services:
       MYSQL_DATABASE: "PVelazquezDB"
       MYSQL_USER: "pvelazquez$%#543"
       MYSQL_PASSWORD: "EstaEsLaContraseniaNumero1234ParaDB"
-    ports:
-      - "3306:3306"
     volumes:
       - default-volume-mysql:/var/lib/mysql:rw
 
-  mailhog:
-    image: mailhog/mailhog
-    container_name: "mailhog"
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-
-  default-azurite:
-    container_name: default-azurite
+  backend_azurite:
+    container_name: "azurite"
     image: mcr.microsoft.com/azure-storage/azurite:3.27.0
-    expose:
-      - 10000
-      - 10001
-      - 10002
-    ports:
-      - "10000:10000"
-      - "10001:10001"
-      - "10002:10002"
     volumes:
       - default-volume-azurite:/data mcr.microsoft.com/azure-storage/azurite
 
-  full-stack-app:
-    stdin_open: true
-    tty: true
+
+  backend_mailhog:
+    container_name: "mailhog"
+    image: mailhog/mailhog
+    expose:
+      - 8025
+    ports:
+      - "8025:8025"
+
+
+  backend:
     build:
+      dockerfile: backend.Dockerfile
       context: .
-      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    depends_on:
+      backend_database:
+        condition: service_started
+      backend_azurite:
+        condition: service_started
+      backend_mailhog:
+        condition: service_started
+
+
 
 volumes:
   default-volume-azurite:
@@ -52,12 +52,6 @@ volumes:
       type: none
       o: bind
       device: ./project-data/azurite
-  default-volume-mongo:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./project-data/mongo
   default-volume-mysql:
     driver: local
     driver_opts:

@@ -7,4 +7,12 @@ README.md
 mvnw
 mvnw.cmd
 project-data
-src/newsletter-frontend/node_modules
+src/newsletter-frontend
+compose.yml
+target
+.gitattributes
+.git
+bin
+newslettlerchallenge.iml
+.dockerignore
+.env

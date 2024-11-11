@@ -8,7 +8,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 FROM openjdk:21-ea-4-jdk-slim
-WORKDIR /app
+WORKDIR .
 
 COPY --from=build /app/target/*.jar app.jar
 

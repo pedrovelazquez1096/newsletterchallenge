@@ -10,6 +10,7 @@ import com.pvelazquez.newslettlerchallenge.services.NewsletterService;
 import com.pvelazquez.newslettlerchallenge.services.RecipientService;
 import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZoneId;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @RequestMapping("/api/v1/newsletter")
 @CrossOrigin(origins = "*")
+@Slf4j
 public class NewsletterController {
     private final NewsletterService newsletterService;
     private final ScheduledEmailService scheduledEmailService;
@@ -38,7 +40,10 @@ public class NewsletterController {
         List<Document> documents = documentService.getAllDocuments(newsletterDTO.getDocuments());
 
 
-        Date date = Date.from( newsletterDTO.getScheduleTime().minusHours(6).atZone(ZoneId.systemDefault()).toInstant());
+        Date date = Date.from(newsletterDTO.getScheduleTime().minusHours(6).atZone(ZoneId.systemDefault()).toInstant());
+        log.warn("OG {}", newsletterDTO.getScheduleTime().toString());
+        log.warn("MOD {}", date.toString());
+
         return scheduledEmailService.scheduleEmail(recipients, documents, date, newsletterDTO.getSubject());
     }
 

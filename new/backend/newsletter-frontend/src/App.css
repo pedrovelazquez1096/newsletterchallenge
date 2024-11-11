@@ -1,0 +1,36 @@
+/* App.css */
+
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1030;
+}
+
+.offcanvas {
+  width: 250px;
+  transition: transform 0.3s ease;
+}
+
+.offcanvas.show {
+  transform: translateX(0);
+}
+
+.offcanvas {
+  visibility: hidden;
+  transform: translateX(-100%);
+}
+
+.content {
+  margin-top: 56px; /* Adjust for navbar height */
+  padding-left: 0;
+  width: 100%;
+  overflow-y: auto;
+}

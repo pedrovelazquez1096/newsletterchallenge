@@ -1,0 +1,43 @@
+version: '3.8'
+services:        
+  backend_app:
+    build:
+      dockerfile: backend.Dockerfile
+      context: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend_database:
+        condition: service_started
+
+
+  backend_database:
+    build:
+      dockerfile: database.Dockerfile
+      context: .
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+
+  backend_azurite:
+    container_name: "azurite"
+    image: mcr.microsoft.com/azure-storage/azurite:3.27.0
+
+  frontend_app:
+    build:
+      dockerfile: frontend.Dockerfile
+      context: newsletter-frontend/
+    ports:
+      - "80:80"
+    depends_on:
+      backend_app:
+        condition: service_started
+
+
+  backend_mailhog:
+    container_name: "mailhog"
+    image: mailhog/mailhog
+    expose:
+      - 8025
+    ports:
+      - "8025:8025"
